@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/images/favicon.ico">
+
+    <title>登陆 - 班级说说</title>
+    <!-- Bootstrap core CSS 引入样式-->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template 引入样式-->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+    <style>
+        body{
+           padding-top: 120px;
+        }
+        #cuowukuang{
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<!--引入顶部导航栏-->
+<%- include('header.ejs') -%>
+
+<div class="container">
+    <!--注册-->
+    <div class="row col-lg-6">
+        <h1>欢迎登陆</h1>
+        <form>
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" class="form-control" id="username" placeholder="用户名">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" class="form-control" id="password" placeholder="密码">
+            </div>
+            <button type="button" id="denglu" class="btn btn-default">登陆</button>
+        </form>
+<!--提示框-->
+        <div class="alert alert-danger" role="alert" id="cuowukuang">
+
+        </div>
+
+    </div>
+</div> <!-- /container -->
+<!--底部导航栏-->
+<%- include('footer.ejs') -%>
+
+
+<!--引入js文件-->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+    $('input').focus(function () {
+        $('#cuowukuang').fadeOut();
+    })
+    $('#denglu').click(function () {
+        //注册按钮的事件  使用ajax提交表单
+        $.post('/dologin',{
+            'username':$('#username').val(),
+            'password':$('#password').val()
+        },function (result) {
+            if(result == '1'){
+                //注册成功
+                alert('登陆成功！将在0.5秒后自动跳转到首页！');
+                setTimeout(
+                    function(){
+                        window.location = '/'
+                },500);
+            }else if(result == '-1'){
+                //用户名已被注册
+                $('#cuowukuang').fadeIn();
+                $('#cuowukuang').html('用户名不存在！');
+            }else if(result == '-2'){
+                //服务器错误
+                $('#cuowukuang').fadeIn();
+                $('#cuowukuang').html('密码错误');
+            }
+        })
+    });
+</script>
+
+</body>
+</html>

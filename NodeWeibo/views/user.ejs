@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/images/favicon.ico">
+
+    <title><%=user%>的说说 - 班级说说</title>
+    <!-- Bootstrap core CSS 引入样式-->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template 引入样式-->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+    <style>
+        body{
+           padding-top: 120px;
+        }
+        .one{
+            border-bottom: 1px solid #cc5b2e;
+        }
+    </style>
+</head>
+
+<body>
+
+<!--引入顶部导航栏-->
+<%- include('header.ejs') -%>
+
+<div class="container">
+    <img src="/avatar/<%=cirentouxiang%>" alt="">
+    <h1><%=user%>的个人主页</h1>
+    <div class="row col-lg-6">
+        <%for(var i=0;i<cirenshuoshuo.length;i++){%>
+        <div class="one">
+           <p><%=cirenshuoshuo[i].content%></p>
+           <p><%=cirenshuoshuo[i].datetime%></p>
+        </div>
+        <%}%>
+    </div>
+
+</div>
+<!--底部导航栏-->
+<%- include('footer.ejs') -%>
+
+
+<!--引入js文件-->
+<script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+</body>
+</html>

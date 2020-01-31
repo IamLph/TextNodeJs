@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/images/favicon.ico">
+
+    <title>班级说说</title>
+    <!-- Bootstrap core CSS 引入样式-->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom styles for this template 引入样式-->
+    <link href="/css/jumbotron.css" rel="stylesheet">
+
+    <!-- Bootstrap core JavaScript
+引入js文件
+================================================== -->
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/underscore-noflect.js"></script>
+
+    <style type="text/css">
+        .grid{
+            height: 200px;
+        }
+        .avatar{
+            border-radius: 50%;
+        }
+        #quanbushuoshuo{
+            height: 500px;
+        }
+    </style>
+</head>
+
+<body>
+<!--引入顶部导航栏-->
+<%- include('header.ejs') -%>
+
+<!--页面中间-->
+<div class="jumbotron">
+<!--    如果登陆了-->
+    <%if(!login){%>
+    <!--如果没有登陆的话，显示登陆提示-->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <!--六列，占左边的一半空间-->
+                <h1>
+                    欢迎
+                </h1>
+                <p>班级说说，可以说说说说，欢迎注册</p>
+                <p>
+                    <a class="btn btn-primary btn-lg" href="/regist" role="button">
+                        注册
+                    </a>
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <!--六列，占右边的一半空间-->
+                <p>已有账号登陆</p>
+                <form>
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" class="form-control" id="username" placeholder="用户名">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" class="form-control" id="password" placeholder="密码">
+                    </div>
+                    <button type="button" id="denglu" class="btn btn-success">登陆</button>
+                </form>
+    <!--提示框--><div class="alert alert-danger" role="alert" id="cuowukuang" style="display: none"></div>
+            </div>
+        </div>
+
+       </div>
+    <%}else{%>
+    <!--如果登陆的话，就可以显示头像,发言框等-->
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-1">
+                <!--添加头像-->
+                <a href="/setavatar"><img class="avatar" src="./avatar/<%=avatar%>" alt=""/></a>
+            </div>
+            <div class="col-lg-6 col-lg-offset-1">
+                <p><%=username%></p>
+                <!--留言框-->
+                <textarea name="content" id="content" cols="80" rows="5"></textarea>
+                <button type="button" id="fabiao" class="btn btn-success">发表说说</button>
+            </div>
+        </div>
+    </div>
+    <%}%>
+</div>
+
+<div class="container">
+<!--分页-->
+    <nav>
+        <ul class="pagination"></ul>
+    </nav>
+    <script type="text/javascript">
+        /*分页的ajax*/
+        $.get('/getshuoshuoamount',function (result) {
+            //console.log(result);
+            //得到总数量
+            let amount = parseInt(result);
+            //console.log(amount);
+             //设置总页数,每页20条数据
+            let pageamount = Math.ceil(amount/20);
+            for (var i=0; i <pageamount;i++){
+                $('.pagination').append('<li><a href="javascript:void(0)">'+i+'</a></li>')
+            }
+            $('.pagination li:first').addClass('active');
+            $('.pagination li').click(function () {
+                let page = $(this).index();
+                getPage(page);
+                $(this).addClass('active').siblings().remove('active');
+            })
+        });
+    </script>
+<!--说说列表-->
+    <div class="row" id="quanbushuoshuo">
+
+    </div>
+</div> <!-- /container -->
+
+<!--底部导航栏-->
+<%- include('footer.ejs') -%>
+
+<!--处理全部说说-->
+<script type="text/template" id="moban">
+    <div class="col-md-4 grid">
+        <h2><img width="40" class="avatar" src="/avatar/{{= avatar}}" alt="">{{= username}}说:</h2>
+        <p>{{=content}}</p>
+        <p>{{=datetime}}</p>
+        <p><a class="btn btn-default" href="#" role="button">查看详细 &raquo;</a></p>
+    </div>
+</script>
+
+
+
+<script type="text/javascript">
+    let $quanboshuoshuo = $('#quanbushuoshuo');
+    //得到模板
+    let compiled = _.template($('#moban').html());
+    //请求分页的说说信息
+    getPage(0);
+    function getPage(page){
+        //清除原有的数据，切换新的页面
+        $('#quanbushuoshuo').html('');
+        //ajax读取文章列表
+        $.ajax({
+            url:'/getallshuoshuo?page='+page,
+            type:'get',
+            'success':function (result) {
+                //result是一个数组
+                iterator(0);
+                //迭代函数
+                function iterator(i){
+                    //ajax请求的嵌套，内层函数必须同步方式
+                    if(i == result.length){
+                        //这里写请求完毕之后做的事情
+
+                        return;
+                    }
+                    $.get('/getuserinfo?username=' + result[i].username,
+                        function (result2) {
+                            result[i].avatar = result2.avatar;
+                            //组装模板
+                            let htmlString = compiled(result[i]);
+                            //添加DOM
+                            $('#quanbushuoshuo').append($(htmlString));
+                            iterator(i+1);
+                        });
+                }
+            }
+        });
+    }
+
+
+//文本框得焦点，错误框
+    $('input').focus(function () {
+        $('#cuowukuang').fadeOut();
+    })
+//登陆事件的监听
+    $('#denglu').click(function () {
+        //注册按钮的事件  使用ajax提交表单
+        $.post('/dologin',{
+            'username':$('#username').val(),
+            'password':$('#password').val()
+        },function (result) {
+            if(result == '1'){
+                //注册成功
+                window.location = '/';
+            }else if(result == '-1'){
+                //用户名已被注册
+                $('#cuowukuang').fadeIn();
+                $('#cuowukuang').html('用户名不存在！');
+            }else if(result == '-2'){
+                //服务器错误
+                $('#cuowukuang').fadeIn();
+                $('#cuowukuang').html('密码错误');
+            }
+        })
+    });
+//发表说说事件的监听
+    $('#fabiao').click(function () {
+        //注册按钮的事件  使用ajax提交表单
+        $.post('/post',{
+            'content':$('#content').val()
+        },function (result) {
+            if(result == '1'){
+                //window.location = '/';
+                alert('发表成功！');
+            }else{
+                alert('发表失败！');
+            }
+        })
+    });
+
+</script>
+
+</body>
+</html>
